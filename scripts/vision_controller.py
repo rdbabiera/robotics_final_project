@@ -15,3 +15,5 @@ class Eyes(object):
         """
         rospy.init_node('wscr_eyes')
 
+    
+

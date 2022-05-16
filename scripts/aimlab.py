@@ -15,8 +15,8 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 
-# Path of directory to locate where to find q_matrices
-learning_path = os.path.dirname(__file__) + "/learning/"
+# Path of directory to locate where to find dqn models
+model_path = os.path.dirname(__file__) + "/models/"
 
 
 class Aimlab(object):
