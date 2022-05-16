@@ -6,6 +6,8 @@ import numpy as np
 import math
 import os
 
+import moveit_commander
+
 class Arm(object):
     def __init__(self):
         """
@@ -14,6 +16,14 @@ class Arm(object):
         rospy.init_node('wscr_arm')
 
         command_sub = rospy.Subscriber() # arm command message topic and type, self.command_callback
+
+        # the interface to the group of joints making up the turtlebot3
+        # openmanipulator arm
+        self.move_group_arm = moveit_commander.MoveGroupCommander("arm")
+
+        # the interface to the group of joints making up the turtlebot3
+        # openmanipulator gripper
+        self.move_group_gripper = moveit_commander.MoveGroupCommander("gripper")
 
     def inverse_kin(self, x, y):
         # inverse kinematics: return 4 angles for the arm joints
