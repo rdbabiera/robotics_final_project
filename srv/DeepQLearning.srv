@@ -1,0 +1,6 @@
+bool done
+uint8 reward
+int8[] next_state
+---
+bool start
+int8[] action

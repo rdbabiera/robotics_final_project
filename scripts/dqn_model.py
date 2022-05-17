@@ -25,6 +25,7 @@ Transition = namedtuple('Transition', ('state', 'action', 'reward', 'next_state'
 class ReplayMemory(object):
     def __init__(self, capacity, batch_size):
         self.memory = deque([],maxlen=capacity)
+        self.capacity = capacity
         self.batch_size = batch_size
 
     def push(self, *args):
