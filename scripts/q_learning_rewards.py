@@ -42,15 +42,17 @@ class QRewarder(object):
         self.last_shot = None
 
     def handle_request(self, request):
-        response = DeepQLearningResponse()
-        response.done = False
-        response.reward = 0
+        print("[SERVER] Recieved Request")
 
-        action = np.array(response.action)
-        b, d, h, w = action.shape
+        response = None
+
+        action = np.reshape(request.action, (1, 1, 480, 640))
+        c, h, w = 1, 480, 640
         # if first frame, make a new game
+
         if request.start:
-            self.current_view = np.zeros((d, h, w), dtype=np.int8)
+            print("[SERVER] Starting Game")
+            self.current_view = np.zeros((c, h, w), dtype=np.int8)
             self.current_balloons = {}
             self.last_shot = np.array([h//2, w//2])
 
@@ -68,6 +70,8 @@ class QRewarder(object):
 
                 bloon = Balloon(pos, rad)
 
+                print("Adding Balloon")
+
                 for y in range(y_coord - rad, y_coord + rad):
                     if y < 0 or y >= h:
                         continue
@@ -80,9 +84,9 @@ class QRewarder(object):
 
                 self.current_balloons[i] = bloon
 
-            response.reward = 0
-            response.done = False
-            response.next_state = self.current_view
+                print("Added balloon")
+
+            response = DeepQLearningResponse(False, 0, np.ndarray.flatten(self.current_view))
 
         else:
             # Get Coordinate of Attack
@@ -91,11 +95,13 @@ class QRewarder(object):
 
             to_remove = []
 
+            response_reward = 0
+
             for i in self.current_balloons:
                 balloon = self.current_balloons[i]
                 if balloon.determine_hit(action):
                     # Determine Reward
-                    response.reward += balloon.determine_prize(action, 
+                    response_reward += balloon.determine_prize(action, 
                         self.last_shot, np.array([h, w]))
 
                     # Remove From Grid/Dictionary
@@ -113,11 +119,15 @@ class QRewarder(object):
                 self.current_balloons.pop(idx)
 
             self.last_shot = action
-            
-            response.next_state = self.current_view
+
+            response_next_state = np.ndarray.flatten(self.current_view)
             
             if len(self.current_balloons) == 0:
-                response.done = True
+                response_done = True
+            else:
+                response_done = False
+            
+            response = DeepQLearningResponse(response_done, response_reward, response_next_state)
         
         return response
 
