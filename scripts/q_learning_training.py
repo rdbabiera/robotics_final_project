@@ -54,7 +54,7 @@ class QTrainer(object):
 
         self.model = AimlabNetwork()
 
-        self.memory = ReplayMemory(5000, 1)
+        self.memory = ReplayMemory(10, 1)
         self.optimizer = optim.RMSprop(self.model.parameters())
 
         print("[MODEL] Initialized!")
@@ -67,18 +67,16 @@ class QTrainer(object):
             math.exp(-1. * self.steps_done / self.eps_decay)
         self.steps_done += 1
         if sample > eps_threshold:
-            with torch.no_grad:
-                temp = self.model(state)
-                return torch.flatten(temp)
+            temp = self.model(state).detach()
+            return torch.flatten(temp)
         else:
-            random_action = torch.rand((self.batch_size, 1, self.h, self.w))
-            random_action = F.softmax(random_action, dim=1)
+            random_action = torch.rand((self.batch_size, 1, self.h, self.w), dtype=torch.float64)
             return torch.flatten(random_action)
 
     def optimize(self):
         if len(self.memory) < self.memory.capacity:
             return
-        transitions = self.memory.sample(self.batch_size)
+        transitions = self.memory.sample()
         batch = Transition(*zip(*transitions))
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
                                         batch.next_state,)), dtype=torch.bool)
@@ -111,10 +109,9 @@ class QTrainer(object):
     def send_request(self, request):
         rospy.wait_for_service('action_request_service')
         response = None
-        print(f"request:\n{request}")
+        #print(f"request:\n{request}")
         try:
             service = rospy.ServiceProxy('action_request_service', DeepQLearning)
-            print("got service")
             response = service(request)
         except rospy.ServiceException as e:
             print("Service Call Failed: %s"%e)
@@ -128,24 +125,20 @@ class QTrainer(object):
 
             # Receive Fresh State
             start = True
-            print("[MODEL] Sending Request")
-            action = np.zeros((self.batch_size * self.h * self.w), dtype=np.float32)
+            action = np.zeros((self.batch_size * self.h * self.w), dtype=np.float64)
             response = self.send_request(DeepQLearningRequest(start, action))
-            print("[MODEL] Recieved Response")
             state = np.reshape(response.next_state, (self.batch_size, 1, self.h, self.w))
+            state = torch.tensor(state)
 
             # While not Done
             done = False
             count = 0
             while not done:
-                print(f"Firing {count}")
                 # Select and perform an action
                 current_request = DeepQLearningRequest()
                 current_request.start = False
                 current_request.action = self.select_action(state).numpy()
                 current_response = self.send_request(current_request)
-
-                act_reshape = np.reshape(current_request.action, (self.h, self.w))
 
                 # Store Transition in Memory
                 self.memory.push(state, current_request.action, 
@@ -153,6 +146,7 @@ class QTrainer(object):
                 
                 # Move to Next State
                 state = np.reshape(current_response.next_state, (self.batch_size, 1, self.h, self.w))
+                state = torch.tensor(state)
 
                 # Perform Optiminzation
                 self.optimize()
