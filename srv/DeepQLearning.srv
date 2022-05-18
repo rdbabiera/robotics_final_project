@@ -1,6 +1,6 @@
 bool start
-float32[] action
+float64[] action
 ---
 bool done
-int8 reward
-int8[] next_state
+float64 reward
+float64[] next_state

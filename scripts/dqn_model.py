@@ -47,9 +47,11 @@ class AimlabNetwork(nn.Module):
         self.hidden_size_1 = 32
         self.hidden_size_2 = 64
         self.hidden_size_3 = 128
+        torch.set_default_dtype(torch.float64)
 
         self.encoder = nn.ModuleList([
             #--- Stage 1
+            nn.Conv2d(self.input_channels, self.hidden_size_1, kernel_size=3, padding=1),
             nn.BatchNorm2d(self.hidden_size_1), 
             nn.ReLU(),
             nn.Conv2d(self.hidden_size_1, self.hidden_size_1, kernel_size=3, padding=1), 
@@ -110,7 +112,7 @@ class AimlabNetwork(nn.Module):
             nn.ReLU(),
             nn.ConvTranspose2d(self.hidden_size_1, self.output_channels, kernel_size=3, padding=1), 
             nn.BatchNorm2d(self.output_channels), 
-            nn.Softmax(dim=1)
+            nn.Sigmoid()
         ])
 
     def forward(self, x):
@@ -133,3 +135,10 @@ class AimlabNetwork(nn.Module):
                 out = l(out)
 
         return out
+
+# if __name__=="__main__":
+#     network = AimlabNetwork()
+#     example = torch.rand((1, 1, 480, 640))
+#     output = network(example)
+#     print(output)
+#     print(output.shape)

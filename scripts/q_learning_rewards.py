@@ -42,8 +42,6 @@ class QRewarder(object):
         self.last_shot = None
 
     def handle_request(self, request):
-        print("[SERVER] Recieved Request")
-
         response = None
 
         action = np.reshape(request.action, (1, 1, 480, 640))
@@ -52,7 +50,7 @@ class QRewarder(object):
 
         if request.start:
             print("[SERVER] Starting Game")
-            self.current_view = np.zeros((c, h, w), dtype=np.int8)
+            self.current_view = np.zeros((c, h, w), dtype=np.float64)
             self.current_balloons = {}
             self.last_shot = np.array([h//2, w//2])
 
@@ -91,7 +89,8 @@ class QRewarder(object):
         else:
             # Get Coordinate of Attack
             max_action = np.where(action == np.amax(action))
-            action = np.array([max_action[0], max_action[1]])
+            action = np.array([max_action[2][0], max_action[3][0]])
+            print(action)
 
             to_remove = []
 
@@ -100,6 +99,8 @@ class QRewarder(object):
             for i in self.current_balloons:
                 balloon = self.current_balloons[i]
                 if balloon.determine_hit(action):
+                    print("balloon hit!")
+
                     # Determine Reward
                     response_reward += balloon.determine_prize(action, 
                         self.last_shot, np.array([h, w]))
@@ -124,6 +125,7 @@ class QRewarder(object):
             
             if len(self.current_balloons) == 0:
                 response_done = True
+                print("All balloons popped!")
             else:
                 response_done = False
             
