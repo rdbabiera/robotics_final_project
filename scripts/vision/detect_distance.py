@@ -1,19 +1,43 @@
+import rospy
 import cv2
 import pyrealsense2
+from robotics_final_project.msg import VisionCoords
 
 # https://pysource.com/2021/03/11/distance-detection-with-depth-camera-intel-realsense-d435i/
 from realsense_depth import *
 
 class ObjectDetector:
     def __init__(self):
+
+        #initialize ros node
+        rospy.init_node('vision')
+
         # Initialize Camera Intel Realsense
         self.dc = DepthCamera()
 
         # List of object positions
         self.positions = []
 
+        #setup publisher to publish x,y, and depth 
+        self.vision_pub = rospy.Publisher('/robot_arm_action', VisionCoords, queue_size=10)
+
+        # Allow subscriber time to set up
+        rospy.sleep(1)
+    
+    #funtion to publish position from depth camera
+    def publish_vision(self, position):
+        vision_coords = VisionCoords()
+        vision_coords.x = position["x"]
+        vision_coords.y = position["y"]
+        vision_coords.depth = position["dis"]
+        self.vision_pub.publish(vision_coords)
+
+
     def run(self):
         while True:
+            #reset positions list
+            self.positions.clear()
+
             ret, depth_frame, color_frame = self.dc.get_frame()
 
             # https://stackoverflow.com/questions/60486029/how-to-find-the-center-of-black-objects-in-an-image-with-python-opencv
@@ -55,6 +79,16 @@ class ObjectDetector:
                 key = cv2.waitKey(1)
                # if key == 27:
                 #    break
+            
+            #tmp code to just send one position that has highest distance
+            max_dis = 0
+            max_pos = {}
+            for pos in self.positions:
+                if pos["dis"] > max_dis:
+                    max_dis = pos["dis"]
+                    max_pos = pos
+            self.publish_vision(max_pos)
+            
             cv2.imshow('depth frame', depth_frame)
             cv2.imshow('color frame', color_frame)
 

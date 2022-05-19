@@ -5,6 +5,8 @@ import cv2, cv_bridge
 import numpy as np
 import math
 import os
+from robotics_final_project.msg import VisionCoords
+
 
 import moveit_commander
 
@@ -21,7 +23,7 @@ class Arm(object):
         self.curr_arm_goals = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
 
         #arm subscriber
-        rospy.Subscriber('/robot_arm_action', RobotArmAction, self.arm_action_received) 
+        rospy.Subscriber('/robot_arm_action', VisionCoords, self.arm_action_received) 
 
         # the interface to the group of joints making up the turtlebot3
         # openmanipulator arm
@@ -30,6 +32,9 @@ class Arm(object):
         # the interface to the group of joints making up the turtlebot3
         # openmanipulator gripper
         self.move_group_gripper = moveit_commander.MoveGroupCommander("gripper")
+
+        # Allow subscriber time to set up
+        rospy.sleep(1)
 
     def inverse_kin(self, x, y, depth):
         # inverse kinematics: return 4 angles for the arm joints
@@ -43,6 +48,10 @@ class Arm(object):
 
     def arm_action_received(self, data):
         # extract shot location from command
+        print("received x:", data.x)
+        print("received y:", data.y)
+        print("received depth:", data.depth)
+
         x, y = data.x, data.y
         depth = data.depth
 
