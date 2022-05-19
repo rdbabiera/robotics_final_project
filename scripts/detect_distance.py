@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 import cv2
 import pyrealsense2
@@ -6,7 +8,7 @@ from robotics_final_project.msg import VisionCoords
 # https://pysource.com/2021/03/11/distance-detection-with-depth-camera-intel-realsense-d435i/
 from realsense_depth import *
 
-class ObjectDetector:
+class ObjectDetector(object):
     def __init__(self):
 
         #initialize ros node

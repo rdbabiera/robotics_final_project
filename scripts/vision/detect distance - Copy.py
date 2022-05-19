@@ -1,6 +1,6 @@
 import cv2
 import pyrealsense2
-from realsense_depth import *
+from scripts.realsense_depth import *
 
 point = (400, 300)
 

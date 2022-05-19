@@ -18,8 +18,8 @@ class Arm(object):
         rospy.init_node('wscr_arm')
 
         #initialize parameters
-        self.l2 = 5 #TODO fill in
-        self.l1 = 5 #TODO fill in
+        self.l2 = 1 #TODO fill in
+        self.l1 = 1 #TODO fill in
         self.curr_arm_goals = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
 
         #arm subscriber
@@ -41,9 +41,17 @@ class Arm(object):
         # that would make the laser aim at the desired location
         # Could also use depth if we are using the depth camera
         #use inverse kinematics to get joint angles for joint1 and joint3
-
-        q3 = math.acos((-(self.l1**2) - self.l2**2 + x**2 + y**2) / (2*self.l1*self.l2))
-        q1 = math.atan2(y, x) - math.atan2((self.l2*math.sin(q3)) / (self.l1 + self.l2*math.cos(q3)))
+        x = x / 1000
+        y = y / 1000
+        num1 = (-(self.l1**2) - self.l2**2 + x**2 + y**2) / (2*self.l1*self.l2)
+        #print("num1:",num1)
+        q3 = math.acos(num1)
+        num2 = (self.l2*math.sin(q3))
+        num3 = (self.l1 + self.l2*math.cos(q3))
+        #print("num2:", num2)
+        q1 = math.atan2(y, x) - math.atan2(num2, num3)
+        print("q1:", q1)
+        print("q3:", q3)
         return [q1, q3]
 
     def arm_action_received(self, data):
@@ -66,8 +74,8 @@ class Arm(object):
         self.move_group_gripper.stop()
         '''
         # move the arm
-        self.curr_arm_goals[0] = joints[0]
-        self.curr_arm_goals[2] = joints[1]
+        self.curr_arm_goals[0] = math.radians(joints[0])
+        self.curr_arm_goals[2] = math.radians(joints[1])
         self.move_group_arm.go(self.curr_arm_goals, wait=True)
         self.move_group_arm.stop()
 
@@ -97,3 +105,9 @@ class Arm(object):
 
     def run(self):
         rospy.spin()
+    
+if __name__ == '__main__':
+    # declare the ROS node and run it
+    ArmClass = Arm()
+    print("running")
+    ArmClass.run()
