@@ -7,14 +7,14 @@ from realsense_depth import *
 class ObjectDetector:
     def __init__(self):
         # Initialize Camera Intel Realsense
-        dc = DepthCamera()
+        self.dc = DepthCamera()
 
         # List of object positions
-        positions = []
+        self.positions = []
 
     def run(self):
         while True:
-            ret, depth_frame, color_frame = dc.get_frame()
+            ret, depth_frame, color_frame = self.dc.get_frame()
 
             # https://stackoverflow.com/questions/60486029/how-to-find-the-center-of-black-objects-in-an-image-with-python-opencv
             # grayscale, Gaussian blur, Otsu's threshold
@@ -31,8 +31,11 @@ class ObjectDetector:
                 # Obtain bounding rectangle to get measurements
                 # x,y,w,h = cv2.boundingRect(c)
 
+
                 # Find centroid
                 M = cv2.moments(c)
+                if M['m00'] == 0:
+                    continue
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
 
@@ -43,15 +46,19 @@ class ObjectDetector:
 
                 # Draw the contour and center of the shape on the image
                 # cv2.rectangle(image,(x,y),(x+w,y+h),(36,255,12), 4)
-                cv2.circle(image, (cX, cY), 10, (320, 159, 22), -1)
+                cv2.circle(color_frame, (cX, cY), 10, (320, 159, 22), -1)
                 distance = depth_frame[cY,cX]
-                coordinates.append({"x":cX, "y":cY, "dis":distance})
+                self.positions.append({"x":cX, "y":cY, "dis":distance})
 
                 cv2.putText(color_frame, "{}mm".format(distance), (cX, cY - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
                 key = cv2.waitKey(1)
-                if key == 27:
-                    break
+               # if key == 27:
+                #    break
+            cv2.imshow('depth frame', depth_frame)
+            cv2.imshow('color frame', color_frame)
+
+
 
 if __name__ == '__main__':
     # declare the ROS node and run it
