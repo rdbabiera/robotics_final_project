@@ -67,8 +67,8 @@ class Arm(object):
         W_FOV = 87 * np.pi/180 # camera total horizontal FOV in radians
 
         # get spherical coordinates of target point in 3D relative to camera's location
-        phi = np.atan((float(x)/W - 0.5) * np.tan(.5 * W_FOV) / 2)
-        theta = np.pi/2 - np.atan((float(y)/H - 0.5) * np.tan(.5 * H_FOV) / 2)
+        phi = np.atan((float(x)/W - 0.5) * np.tan(.5 * W_FOV) * 2)
+        theta = np.pi/2 - np.atan((float(y)/H - 0.5) * np.tan(.5 * H_FOV) * 2)
         r = float(depth)
 
         # adjust point based on difference between camera location and laser location
