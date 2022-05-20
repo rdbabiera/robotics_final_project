@@ -5,6 +5,8 @@ import cv2, cv_bridge
 import numpy as np
 import math
 import os
+from robotics_final_project.msg import VisionCoords
+
 
 import moveit_commander
 
@@ -16,12 +18,12 @@ class Arm(object):
         rospy.init_node('wscr_arm')
 
         #initialize parameters
-        self.l2 = 5 #TODO fill in
-        self.l1 = 5 #TODO fill in
+        self.l2 = 1 #TODO fill in
+        self.l1 = 1 #TODO fill in
         self.curr_arm_goals = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
 
         #arm subscriber
-        rospy.Subscriber('/robot_arm_action', RobotArmAction, self.arm_action_received) 
+        rospy.Subscriber('/robot_arm_action', VisionCoords, self.arm_action_received) 
 
         # the interface to the group of joints making up the turtlebot3
         # openmanipulator arm
@@ -31,18 +33,33 @@ class Arm(object):
         # openmanipulator gripper
         self.move_group_gripper = moveit_commander.MoveGroupCommander("gripper")
 
+        # Allow subscriber time to set up
+        rospy.sleep(1)
+
     def inverse_kin(self, x, y, depth):
         # inverse kinematics: return 4 angles for the arm joints
         # that would make the laser aim at the desired location
         # Could also use depth if we are using the depth camera
         #use inverse kinematics to get joint angles for joint1 and joint3
-
-        q3 = math.acos((-(self.l1**2) - self.l2**2 + x**2 + y**2) / (2*self.l1*self.l2))
-        q1 = math.atan2(y, x) - math.atan2((self.l2*math.sin(q3)) / (self.l1 + self.l2*math.cos(q3)))
+        x = x / 1000
+        y = y / 1000
+        num1 = (-(self.l1**2) - self.l2**2 + x**2 + y**2) / (2*self.l1*self.l2)
+        #print("num1:",num1)
+        q3 = math.acos(num1)
+        num2 = (self.l2*math.sin(q3))
+        num3 = (self.l1 + self.l2*math.cos(q3))
+        #print("num2:", num2)
+        q1 = math.atan2(y, x) - math.atan2(num2, num3)
+        print("q1:", q1)
+        print("q3:", q3)
         return [q1, q3]
 
     def arm_action_received(self, data):
         # extract shot location from command
+        print("received x:", data.x)
+        print("received y:", data.y)
+        print("received depth:", data.depth)
+
         x, y = data.x, data.y
         depth = data.depth
 
@@ -57,8 +74,8 @@ class Arm(object):
         self.move_group_gripper.stop()
         '''
         # move the arm
-        self.curr_arm_goals[0] = joints[0]
-        self.curr_arm_goals[2] = joints[1]
+        self.curr_arm_goals[0] = math.radians(joints[0])
+        self.curr_arm_goals[2] = math.radians(joints[1])
         self.move_group_arm.go(self.curr_arm_goals, wait=True)
         self.move_group_arm.stop()
 
@@ -88,3 +105,9 @@ class Arm(object):
 
     def run(self):
         rospy.spin()
+    
+if __name__ == '__main__':
+    # declare the ROS node and run it
+    ArmClass = Arm()
+    print("running")
+    ArmClass.run()
