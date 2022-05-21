@@ -36,18 +36,18 @@ class Arm(object):
         # Allow subscriber time to set up
         rospy.sleep(1)
 
-    def spherical_to_cartesian(r, theta, phi):
+    def spherical_to_cartesian(self, r, theta, phi):
         return np.array([r * np.cos(phi) * np.sin(theta),
                          r * np.sin(phi) * np.sin(theta),
                          r * np.cos(theta)])
 
-    def cartesian_to_spherical(x, y, z):
+    def cartesian_to_spherical(self, x, y, z):
         r = np.sqrt(x**2 + y**2 + z**2)
-        theta = np.acos(z / r)
+        theta = math.acos(z / r)
         if x > 0:
-            phi = np.atan(y / x)
+            phi = math.atan(y / x)
         elif x < 0:
-            phi = np.atan(y / x) + (np.pi if y >= 0 else -np.pi)
+            phi = math.atan(y / x) + (np.pi if y >= 0 else -np.pi)
         else:
             phi = np.pi/2 if y >= 0 else -np.pi/2
         return np.array([r, theta, phi])
@@ -63,12 +63,12 @@ class Arm(object):
 
         H = 480 # image height in pixels
         W = 640 # image width in pixels
-        H_FOV = 58 * np.pi/180 # camera total vertical FOV in radians
-        W_FOV = 87 * np.pi/180 # camera total horizontal FOV in radians
+        H_FOV = 42 * np.pi/180 # camera total vertical FOV in radians
+        W_FOV = 69 * np.pi/180 # camera total horizontal FOV in radians
 
         # get spherical coordinates of target point in 3D relative to camera's location
-        phi = np.atan((float(x)/W - 0.5) * np.tan(.5 * W_FOV) * 2)
-        theta = np.pi/2 - np.atan((float(y)/H - 0.5) * np.tan(.5 * H_FOV) * 2)
+        phi = math.atan((float(x)/W - 0.5) * np.tan(.5 * W_FOV) * 2)
+        theta = np.pi/2 - math.atan((float(y)/H - 0.5) * np.tan(.5 * H_FOV) * 2)
         r = float(depth)
 
         # adjust point based on difference between camera location and laser location
@@ -76,7 +76,7 @@ class Arm(object):
         # x axis is forward and back
         # y axis is left and right
         # z axis is up and down
-        pos = spherical_to_cartesian(r, theta, phi)
+        pos = self.spherical_to_cartesian(r, theta, phi)
 
         # Location of the laser relative to the camera
         # this should be in the same units as the depth reading (mm)
@@ -86,11 +86,11 @@ class Arm(object):
         camera_laser_relative_pos = np.array([-150, 0, 200])
 
         pos_relative_to_laser = pos - camera_laser_relative_pos
-        r, theta, phi = cartesian_to_spherical(*pos_relative_to_laser)
+        r, theta, phi = self.cartesian_to_spherical(*pos_relative_to_laser)
 
         # the first joint swivles to match phi, the second joint points straight up
         # the third joint rotates to match theta, the wrist joint is straight
-        return [phi * (180/np.pi), 0.0, (np.pi/2 - theta) * (180/np.pi), 0.0]
+        return [-phi, 0.0, (np.pi/2 - theta), 0.0]
 
     def arm_action_received(self, data):
         # extract shot location from command
@@ -102,6 +102,7 @@ class Arm(object):
         depth = data.depth
 
         joints = self.inverse_kin(x, y, depth)
+        print("joints:", joints)
 
 
         '''
@@ -117,17 +118,17 @@ class Arm(object):
         self.move_group_arm.stop()
 
         # close the claw (laser on)
-        gripper_joint_goal = [-0.01, -0.01]
-        self.move_group_gripper.go(gripper_joint_goal, wait=True)
-        rospy.sleep(0.5)
-        self.move_group_gripper.stop()
+        #gripper_joint_goal = [-0.019, -0.019]
+        #self.move_group_gripper.go(gripper_joint_goal, wait=True)
+        #rospy.sleep(0.5)
+        #self.move_group_gripper.stop()
     
     # Sets the arm position of the robot to point upward
     def reset_arm_position(self):
 
         # Fetch arm joint and gripper positions from self.positions
         arm_joint_goal = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
-        gripper_joint_goal = [0.019, 0.019]
+        gripper_joint_goal = [-0.01, -0.01]
 
         # Send arm joint move, and call stop() to prevent residual movement
         self.move_group_arm.go(arm_joint_goal, wait=True)
@@ -141,6 +142,7 @@ class Arm(object):
 
 
     def run(self):
+        self.reset_arm_position()
         rospy.spin()
     
 if __name__ == '__main__':
