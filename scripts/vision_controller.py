@@ -94,8 +94,9 @@ class ObjectDetector(object):
                 print("publishing camera feed")
                 self.publish_vision(max_pos)
             
-            cv2.imshow('depth frame', depth_frame)
+            #cv2.imshow('depth frame', depth_frame)
             cv2.imshow('color frame', color_frame)
+            rospy.sleep(6)
 
 
 
