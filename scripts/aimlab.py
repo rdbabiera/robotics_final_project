@@ -6,10 +6,12 @@ import numpy as np
 import math
 import os
 
+import torch
 
 from arm_controller import Arm
-from vision_controller import Eyes
+from vision_controller import ObjectDetector
 
+from dqn_model import AimlabNetwork
 
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
@@ -26,9 +28,14 @@ class Aimlab(object):
         """
         rospy.init_node('wscr_aimlab')
 
+        #--- Initialize Model
+        self.model = AimlabNetwork()
+        self.model.load_state_dict(torch.load(model_path + 'aimlab_model.pt'))
+        self.model.eval()
+
         #--- Initialize Vision and Control Components
         self.arm = Arm()
-        self.eyes = Eyes()
+        self.object_detector = ObjectDetector()
 
         #--- Initialize Publishers and Subscribers
         self.bridge = cv_bridge.CvBridge()
