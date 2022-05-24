@@ -64,7 +64,7 @@ class Arm(object):
         H = 480 # image height in pixels
         W = 640 # image width in pixels
         H_FOV = 42 * np.pi/180 # camera total vertical FOV in radians
-        W_FOV = 69 * np.pi/180 # camera total horizontal FOV in radians
+        W_FOV = 50 * np.pi/180 # camera total horizontal FOV in radians
 
         # get spherical coordinates of target point in 3D relative to camera's location
         phi = math.atan((float(x)/W - 0.5) * np.tan(.5 * W_FOV) * 2)
@@ -83,14 +83,14 @@ class Arm(object):
         # Assuming laser goes out parallel to the gripper direction
         # we can say that the laser "starts" at the elbow joint, which is
         # always in the same location
-        camera_laser_relative_pos = np.array([-150, 0, 200])
+        camera_laser_relative_pos = np.array([-200, 0, 175])
 
         pos_relative_to_laser = pos - camera_laser_relative_pos
         r, theta, phi = self.cartesian_to_spherical(*pos_relative_to_laser)
 
         # the first joint swivles to match phi, the second joint points straight up
         # the third joint rotates to match theta, the wrist joint is straight
-        return [-phi, 0.0, (np.pi/2 - theta), 0.0]
+        return [-phi, 0.0, (np.pi/2 - theta - 0.1), 0.0]
 
     def arm_action_received(self, data):
         # extract shot location from command
@@ -129,6 +129,7 @@ class Arm(object):
         # Fetch arm joint and gripper positions from self.positions
         arm_joint_goal = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
         gripper_joint_goal = [-0.01, -0.01]
+        #gripper_joint_goal = [0.0, 0.0]
 
         # Send arm joint move, and call stop() to prevent residual movement
         self.move_group_arm.go(arm_joint_goal, wait=True)
