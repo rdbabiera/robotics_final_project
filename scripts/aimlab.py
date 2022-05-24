@@ -64,9 +64,40 @@ class Aimlab(object):
         self.last_scan = data
     
     def vision_received(self, data):
-        #model stuff
-        #self.arm_pub.publish(whatever visioncoord model decides)
-        pass
+        rate = rospy.Rate(5)
+
+        # If No Data, then stare down middle of frame
+        if len(data.positions) == 0:
+            blank_target = VisionCoords(239, 319, 1)
+            for i in range(0, 10):
+                self.arm_pub.publish(blank_target)
+                rate.sleep()
+            return
+
+        # If Data Exists, then Normalize
+        state = []
+        max_depth = 0
+        for row in data.positions:
+            if row[2] > max_depth:
+                max_depth = row[2]
+        for row in data.positions:
+            state.append([row[0]/480, row[1]/640, row[2]/max_depth])
+
+        # Convert Tensor to Torch, Get Action from Pretrained Model
+        state = torch.tensor(state, dtype=torch.double)
+        state = state.reshape(1, -1, 3)
+
+        action = self.model(state.float()).max(1)[1].view(1, 1).item()
+
+        # Get Target Info, Send to Arm Controller
+        target = data.positions[action]
+        target_location = VisionCoords(target[0], target[1], target[2])
+
+        for i in range(0, 10):
+            self.arm_pub.publish(target_location)
+            rate.sleep()
+
+        return
 
 
     """
