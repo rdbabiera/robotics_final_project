@@ -6,7 +6,7 @@ import numpy as np
 import math
 import os
 from robotics_final_project.msg import VisionCoords
-
+from realsense_depth import *
 
 import moveit_commander
 
@@ -17,9 +17,10 @@ class Arm(object):
         """
         rospy.init_node('wscr_arm')
 
+        # initialize camera
+        self.dc = DepthCamera()
+
         #initialize parameters
-        self.l2 = 1 #TODO fill in
-        self.l1 = 1 #TODO fill in
         self.curr_arm_goals = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
 
         #arm subscriber
@@ -112,16 +113,49 @@ class Arm(object):
         rospy.sleep(0.5)
         self.move_group_gripper.stop()
         '''
-        # move the arm
+
+        # move the arm according to inverse kin
         self.curr_arm_goals = joints
         self.move_group_arm.go(self.curr_arm_goals, wait=True)
+        rospy.sleep(3)
         self.move_group_arm.stop()
 
+        '''
         # close the claw (laser on)
-        #gripper_joint_goal = [-0.019, -0.019]
-        #self.move_group_gripper.go(gripper_joint_goal, wait=True)
-        #rospy.sleep(0.5)
-        #self.move_group_gripper.stop()
+        gripper_joint_goal = [-0.019, -0.019]
+        self.move_group_gripper.go(gripper_joint_goal, wait=True)
+        rospy.sleep(0.5)
+        self.move_group_gripper.stop()
+        '''
+
+        # identify where the laser is in the camera feed and adjust aim accordingly
+        laser_x, laser_y = -10, -10
+        steps = 0
+        # mask: assume laser is in a 60x60 square centered on the target point
+        mask = np.zeros((H, W))
+        mask[max(y-30,0):min(y+30,H), max(x-30,0):min(x+30,W)] = 255
+
+        # do up to 4 iterations, stop if the laser is already close
+        while (abs(laser_x - x) > 5 or abs(laser_y - y) > 5) and steps < 4:
+            # get location of laser in image
+            ret, depth_frame, color_frame = self.dc.get_frame()
+            gray = cv2.cvtColor(color_frame, cv2.COLOR_BGR2GRAY)
+            # blur image to reduce noise
+            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            maxLoc = cv2.minMaxLoc(blurred, mask)[3]
+            print(f"I think laser is at {maxLoc}. Difference from target: {laser_x - x}, {laser_y - y}")
+
+            # adjust aim
+            self.curr_arm_goals[0] += (maxLoc[1] - x) * 0.003
+            self.curr_arm_goals[2] -= (maxLoc[0] - y) * 0.003
+            print(f"Adjusted joints to {self.curr_arm_goals}")
+
+            # move the arm
+            self.move_group_arm.go(self.curr_arm_goals, wait=True)
+            rospy.sleep(0.5)
+            self.move_group_arm.stop()
+
+            steps += 1
     
     # Sets the arm position of the robot to point upward
     def reset_arm_position(self):
