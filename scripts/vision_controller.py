@@ -3,7 +3,7 @@
 import rospy
 import cv2
 import pyrealsense2
-from robotics_final_project.msg import VisionCoords
+from robotics_final_project.msg import VisionCoords, ListVisionCoords
 
 # https://pysource.com/2021/03/11/distance-detection-with-depth-camera-intel-realsense-d435i/
 from realsense_depth import *
@@ -21,18 +21,22 @@ class ObjectDetector(object):
         self.positions = []
 
         #setup publisher to publish x,y, and depth 
-        self.vision_pub = rospy.Publisher('/robot_arm_action', VisionCoords, queue_size=10)
+        self.vision_pub = rospy.Publisher('/robot_vision', ListVisionCoords, queue_size=10)
 
         # Allow subscriber time to set up
         rospy.sleep(1)
     
     #funtion to publish position from depth camera
-    def publish_vision(self, position):
-        vision_coords = VisionCoords()
-        vision_coords.x = position["x"]
-        vision_coords.y = position["y"]
-        vision_coords.depth = position["dis"]
-        self.vision_pub.publish(vision_coords)
+    def publish_vision(self, positions):
+        pub = ListVisionCoords()
+        pub.positions = []
+        for pos in positions:
+            vision_coords = VisionCoords()
+            vision_coords.x = pos["x"]
+            vision_coords.y = pos["y"]
+            vision_coords.depth = pos["dis"]
+            pub.positions.append(vision_coords)
+        self.vision_pub.publish(pub)
 
 
     def run(self):
@@ -82,7 +86,8 @@ class ObjectDetector(object):
                # if key == 27:
                 #    break
             
-            #tmp code to just send one position that has highest distance
+            self.publish_vision(self.positions)
+            '''
             max_dis = 0
             max_pos = {}
             for pos in self.positions:
@@ -93,7 +98,7 @@ class ObjectDetector(object):
             if len(max_pos) != 0:
                 print("publishing camera feed")
                 self.publish_vision(max_pos)
-            
+            '''
             #cv2.imshow('depth frame', depth_frame)
             cv2.imshow('color frame', color_frame)
             rospy.sleep(6)

@@ -16,6 +16,7 @@ from dqn_model import AimlabNetwork
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
+from robotics_final_project.msg import ListVisionCoords, VisionCoords
 
 # Path of directory to locate where to find dqn models
 model_path = os.path.dirname(__file__) + "/models/"
@@ -45,6 +46,9 @@ class Aimlab(object):
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.scan_callback)
         self.last_scan = None
 
+        rospy.Subscriber('/robot_vision', ListVisionCoords, self.vision_received)
+        self.arm_pub = rospy.Publisher('/robot_arm_action', VisionCoords, queue_size=10)
+
         #--- Warmup Sleep
         rospy.sleep(3)
         
@@ -58,6 +62,11 @@ class Aimlab(object):
 
     def scan_callback(self, data):
         self.last_scan = data
+    
+    def vision_received(self, data):
+        #model stuff
+        #self.arm_pub.publish(whatever visioncoord model decides)
+        pass
 
 
     """
