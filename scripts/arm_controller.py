@@ -35,6 +35,7 @@ class Arm(object):
 
         # Allow subscriber time to set up
         rospy.sleep(1)
+        print("[ARM] Ready to Go!")
 
     def spherical_to_cartesian(self, r, theta, phi):
         return np.array([r * np.cos(phi) * np.sin(theta),
@@ -149,5 +150,4 @@ class Arm(object):
 if __name__ == '__main__':
     # declare the ROS node and run it
     ArmClass = Arm()
-    print("running")
     ArmClass.run()

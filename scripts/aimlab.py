@@ -34,34 +34,18 @@ class Aimlab(object):
         self.model.load_state_dict(torch.load(model_path + 'aimlab_model.pt'))
         self.model.eval()
 
-        #--- Initialize Vision and Control Components
-        self.arm = Arm()
-        self.object_detector = ObjectDetector()
-
         #--- Initialize Publishers and Subscribers
-        self.bridge = cv_bridge.CvBridge()
-        self.image_sub = rospy.Subscriber('camera/rgb/image_raw', Image, self.image_callback)
-        self.last_image = None
-
-        self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.scan_callback)
-        self.last_scan = None
-
         rospy.Subscriber('/robot_vision', ListVisionCoords, self.vision_received)
         self.arm_pub = rospy.Publisher('/robot_arm_action', VisionCoords, queue_size=10)
 
         #--- Warmup Sleep
-        rospy.sleep(3)
+        rospy.sleep(2)
+        print("[AIMLAB] Ready to Go!")
         
 
     """
     Callback Methods
     """
-    def image_callback(self, data):
-        image = self.bridge.imgmsg_to_cv2(data, desired_encoding='bgr8')
-        self.last_image = image
-
-    def scan_callback(self, data):
-        self.last_scan = data
     
     def vision_received(self, data):
         rate = rospy.Rate(5)
