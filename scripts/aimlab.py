@@ -53,19 +53,21 @@ class Aimlab(object):
         # If No Data, then stare down middle of frame
         if len(data.positions) == 0:
             blank_target = VisionCoords(239, 319, 1)
-            for i in range(0, 10):
-                self.arm_pub.publish(blank_target)
-                rate.sleep()
+            #for i in range(0, 10):
+            self.arm_pub.publish(blank_target)
+            #    rate.sleep()
             return
 
         # If Data Exists, then Normalize
         state = []
         max_depth = 0
         for row in data.positions:
-            if row[2] > max_depth:
-                max_depth = row[2]
+            print('row:', row)
+            if row.depth > max_depth:
+                max_depth = row.depth
+        
         for row in data.positions:
-            state.append([row[1]/480, row[0]/640, row[2]/max_depth])
+            state.append([row.y/480, row.x/640, row.depth/max_depth])
 
         # Convert Tensor to Torch, Get Action from Pretrained Model
         state = torch.tensor(state, dtype=torch.double)
@@ -75,11 +77,11 @@ class Aimlab(object):
 
         # Get Target Info, Send to Arm Controller
         target = data.positions[action]
-        target_location = VisionCoords(target[0], target[1], target[2])
+        target_location = VisionCoords(target.x, target.y, target.depth)
 
-        for i in range(0, 10):
-            self.arm_pub.publish(target_location)
-            rate.sleep()
+        #for i in range(0, 10):
+        self.arm_pub.publish(target_location)
+        #    rate.sleep()
 
         return
 

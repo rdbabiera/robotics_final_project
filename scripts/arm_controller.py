@@ -128,7 +128,7 @@ class Arm(object):
     def reset_arm_position(self):
 
         # Fetch arm joint and gripper positions from self.positions
-        arm_joint_goal = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
+        arm_joint_goal = [math.radians(0.0), math.radians(0.0), math.radians(0.0), math.radians(0.0)]
         gripper_joint_goal = [-0.01, -0.01]
         #gripper_joint_goal = [0.0, 0.0]
 
@@ -140,7 +140,7 @@ class Arm(object):
         self.move_group_gripper.go(gripper_joint_goal, wait=True)
         self.move_group_gripper.stop()
 
-        rospy.sleep(4)
+        rospy.sleep(1)
 
 
     def run(self):

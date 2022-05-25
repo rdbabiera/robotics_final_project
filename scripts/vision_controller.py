@@ -24,7 +24,7 @@ class ObjectDetector(object):
         self.vision_pub = rospy.Publisher('/robot_vision', ListVisionCoords, queue_size=10)
 
         # Allow subscriber time to set up
-        rospy.sleep(1)
+        rospy.sleep(5)
         
     
     #funtion to publish position from depth camera
@@ -101,7 +101,7 @@ class ObjectDetector(object):
                 self.publish_vision(max_pos)
             '''
             #cv2.imshow('depth frame', depth_frame)
-            cv2.imshow('color frame', color_frame)
+            #cv2.imshow('color frame', color_frame)
             rospy.sleep(6)
 
 

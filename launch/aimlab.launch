@@ -1,15 +1,11 @@
 <launch>
-  <!-- include OPENMANIPULATOR -->
-  <include file="$(find turtlebot3_manipulation_bringup)/launch/turtlebot3_manipulation_bringup.launch"></include>
-  <include file="$(find turtlebot3_manipulation_moveit_config)/launch/move_group.launch"></include>
-
   <!-- run aimlab.py-->
   <node pkg="robotics_final_project" type="aimlab.py" name="aimlab_controller"/>
 
   <!-- run arm_controller.py-->
   <node pkg="robotics_final_project" type="arm_controller.py" name="arm_controller"/>
 
-  <!-- run detect_distance.py-->
+  <!-- run vision_controller.py-->
   <node pkg="robotics_final_project" type="vision_controller.py" name="vision_controller"/>
 
 
