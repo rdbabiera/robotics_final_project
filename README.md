@@ -77,6 +77,17 @@ Kinematics Controller.
 
 ### Kinematics
 
+The arm controller takes in x and y image coordinates and a corresponding depth
+reading, and moves the arm so that the laser aims at that point in 3D space. The
+position of the target point relative to the camera in spherical coordinates is 
+caluculated using the coordinates and depth, as well as known values for camera's 
+vertical and horizontal FOV. This point is then moved to account for the difference 
+in position between the camera and the laser, which is done by converting it to
+cartesian coordinates, then converting it back to spherical coordinates after the
+adjustment. Once we know the angles we want to fire at, we aim the laser by 
+manipulating the first and third arm joints: the first joint controls the 
+left-and-right angle, and the third joint controls the up-and-down angle.
+
 <hr>
 
 ## Code Execution
@@ -106,6 +117,12 @@ of all kinds but also to understand the score space better in terms of
 depth-based scoring.
 
 ### Kinematics Challenges
+While the theoretical foundations of our kinematics calculations are sound, the fact
+that the laser travels across a long distance means that very small errors in the 
+setup or measurements have a large impact on where the laser lands. Because of this,
+we had to experiment with many different parameters, such as the FOV we used and the
+precise camera position, to get the aim to be reasonably accurate, and the system is 
+still fairly sensitive to small misalignments.
 
 <hr>
 
@@ -115,6 +132,13 @@ Given 2-3 more weeks to work on this project, the most ambitious thing we could
 achieve is to live up to our group name and not only train a "Chris Rock classifier 
 model", but also to have turtlebot drive up to said balloon and use the arm to 
 slap it.
+
+One method we considered for making the kinematics system more robust to error is 
+using input from the camera to make small corrections to the aim. This would involve 
+using our current kinematics calculations to aim close to the target point, then 
+identifying where the laser is hitting on the camera feed and adjusting the aim
+accordingly with a form of proportional control. This adjustment step could be done 
+several times in a row until the desired accuracy is reached.
 
 <hr>
 
