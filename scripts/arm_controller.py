@@ -143,11 +143,12 @@ class Arm(object):
             # blur image to reduce noise
             blurred = cv2.GaussianBlur(gray, (5, 5), 0)
             maxLoc = cv2.minMaxLoc(blurred, mask)[3]
+            laser_y, laser_x = maxLoc
             print(f"I think laser is at {maxLoc}. Difference from target: {laser_x - x}, {laser_y - y}")
 
             # adjust aim
-            self.curr_arm_goals[0] += (maxLoc[1] - x) * 0.003
-            self.curr_arm_goals[2] -= (maxLoc[0] - y) * 0.003
+            self.curr_arm_goals[0] += (laser_x - x) * 0.003
+            self.curr_arm_goals[2] -= (laser_y - y) * 0.003
             print(f"Adjusted joints to {self.curr_arm_goals}")
 
             # move the arm
