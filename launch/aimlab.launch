@@ -10,7 +10,7 @@
   <node pkg="robotics_final_project" type="arm_controller.py" name="arm_controller"/>
 
   <!-- run detect_distance.py-->
-  <node pkg="robotics_final_project" type="detect_distance.py" name="detect_distance"/>
+  <node pkg="robotics_final_project" type="vision_controller.py" name="vision_controller"/>
 
 
 </launch>

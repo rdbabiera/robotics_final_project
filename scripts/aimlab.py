@@ -65,7 +65,7 @@ class Aimlab(object):
             if row[2] > max_depth:
                 max_depth = row[2]
         for row in data.positions:
-            state.append([row[0]/480, row[1]/640, row[2]/max_depth])
+            state.append([row[1]/480, row[0]/640, row[2]/max_depth])
 
         # Convert Tensor to Torch, Get Action from Pretrained Model
         state = torch.tensor(state, dtype=torch.double)

@@ -12,7 +12,7 @@ class ObjectDetector(object):
     def __init__(self):
 
         #initialize ros node
-        rospy.init_node('vision')
+        rospy.init_node('wscr_vision')
 
         # Initialize Camera Intel Realsense
         self.dc = DepthCamera()
@@ -25,6 +25,7 @@ class ObjectDetector(object):
 
         # Allow subscriber time to set up
         rospy.sleep(1)
+        
     
     #funtion to publish position from depth camera
     def publish_vision(self, positions):
