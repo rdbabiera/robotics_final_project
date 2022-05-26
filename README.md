@@ -24,16 +24,39 @@ properly aim at the correct coordinates.
 
 ### Why this is interesting
 
-write here
+This project is interesting for reasons spanning multiple disciplines.
+1. AI is fascinating. Whether it's being used to segment different objects 
+in auto-pilot settings or to solve different puzzles, the intersection of robotics 
+and machine learning present seemingly limitless possibility.
+
+2. What we've effectively made is a balloon turret! We've also been able to 
+experiment with different pieces of hardware (the RealSense camera), and it's 
+been fun to scrap together different parts into one system.
 
 ### Accomplishments
 
-write here
-
+This system is capable of taking in camera feed of balloons, and for each state 
+determining the optimal shot to take in order to maximize score more frequently 
+than randomly guessing. The DQN model also gives a 3% accuracy boost to choosing 
+a path that performs better than the average score across all paths. More importantly, 
+we became able to aim the arm given the current and requested points from RGB images, 
+as well as gaining experience with new devices such as the RealSense camera.
 
 ### Project Diagram
 
-write here
+Looking at the system diagram below, our program activates three independent nodes 
+(yellow) and cascades messages down a pipeline based on callbacks. Before this, 
+q_learning_notebook.ipynb trains the DQN model used in aimlab, and realsense_depth.py 
+provides the proper overhead required to retrieve the camera feed and depth data. 
+Upon receiving an image, vision_controller.py publishes a list of balloon coordinates 
+with a ListVisionCoords message via the topic "/robot_vision", and aimlab.py 
+feeds this data to the model to select a balloon for targeting. It passes the 
+desired coordinates through a VisionCoords message via the "/robot_arm_action" topic, 
+and the arm_controller.py module moves the arm.
+
+
+### Demo
+
 
 <hr>
 
@@ -92,7 +115,27 @@ left-and-right angle, and the third joint controls the up-and-down angle.
 
 ## Code Execution
 
-write here
+In order to execute the code, there may be a few packages that are required not 
+commonly used in the course. They are:
+1. torch
+2. torchvision
+
+Assuming a flashlight/laser pointer is already situated within the arm's grip, 
+and the RealSense camera is already configured for the system the code is being 
+run on, the moveit packages must first be ran. They are:
+1. roslaunch turtlebot3_manipulation_bringup turtlebot3_manipulation_bringup.launch
+2. roslaunch turtlebot3_manipulation_moveit_config move_group.launch
+
+At this point, there are two ways to run the program. One may either use the 
+command
+- roslaunch robotics_final_project aimlab.launch
+
+or run all three files sequentially in the recommended order:
+1. aimlab.py
+2. arm_controller.py
+3. vision_controller.py
+
+vision_controller.py must be ran last as it publishes messages to the aimlab node.
 
 <hr>
 
@@ -144,4 +187,10 @@ several times in a row until the desired accuracy is reached.
 
 ## Takeaways
 
-write here
+1. Project scope is retrospective. At the beginning of this project, we wanted 
+to achieve a lot, mostly creating a Chris Rock popping robot. Working with new 
+APIs and hardware have learning curves to them, and designing a model with very 
+little features to work with is a large task to undertake. The most important 
+aspect to this project's success was realizing what each person could achieve 
+within their respective modules and compromising on what we had to provide each 
+other with.
