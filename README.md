@@ -54,8 +54,13 @@ feeds this data to the model to select a balloon for targeting. It passes the
 desired coordinates through a VisionCoords message via the "/robot_arm_action" topic, 
 and the arm_controller.py module moves the arm.
 
+![diagram](https://user-images.githubusercontent.com/66919143/170400169-e8228ca9-8ac8-4e01-9f1f-c0606b1a11af.PNG)
+
 
 ### Demo
+
+https://user-images.githubusercontent.com/66919143/170400189-b3733cd4-9a69-4ee8-abe7-5650087d8624.mp4
+
 
 
 <hr>
