@@ -4,6 +4,12 @@ A CMSC 20600 Final Project, spring 2022
 ## Team Members
 RD Babiera, Jason Chee, David Pan, Kendrick Xie
 
+### Senior Work Contribution
+RD - I designed/trained the DQN model and linked the path between the ListVisionCoords 
+to the Arm Coordinates.
+
+David - 
+
 ## Project Description
 ### Goals
 
