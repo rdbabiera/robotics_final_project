@@ -8,7 +8,7 @@ RD Babiera, Jason Chee, David Pan, Kendrick Xie
 RD - I designed/trained the DQN model and linked the path between the ListVisionCoords 
 to the Arm Coordinates.
 
-David - 
+David - I calculated and implemented the arm inverse kinematics for aiming.
 
 ## Project Description
 ### Goals
