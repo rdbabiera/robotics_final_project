@@ -61,6 +61,9 @@ class ObjectDetector(object):
 
             ret, depth_frame, color_frame = self.dc.get_frame()
 
+            # Facial recognition logic adapted from:
+            # https://github.com/ageitgey/face_recognition/blob/master/examples/facerec_from_webcam_faster.py
+
             # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
             rgb_frame = color_frame[:, :, ::-1]
 
