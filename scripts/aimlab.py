@@ -53,9 +53,7 @@ class Aimlab(object):
         # If No Data, then stare down middle of frame
         if len(data.positions) == 0:
             blank_target = VisionCoords(239, 319, 1)
-            #for i in range(0, 10):
             self.arm_pub.publish(blank_target)
-            #    rate.sleep()
             return
 
         # If Data Exists, then Normalize
@@ -79,9 +77,7 @@ class Aimlab(object):
         target = data.positions[action]
         target_location = VisionCoords(target.x, target.y, target.depth)
 
-        #for i in range(0, 10):
         self.arm_pub.publish(target_location)
-        #    rate.sleep()
 
         return
 

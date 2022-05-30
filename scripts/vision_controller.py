@@ -59,21 +59,13 @@ class ObjectDetector(object):
             cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
             for c in cnts:
-                # Obtain bounding rectangle to get measurements
-                # x,y,w,h = cv2.boundingRect(c)
-
-
+                
                 # Find centroid
                 M = cv2.moments(c)
                 if M['m00'] == 0:
                     continue
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
-
-                # # Crop and save ROI
-                # ROI = original[y:y+h, x:x+w]
-                # cv2.imwrite('ROI_{}.png'.format(ROI_number), ROI)
-                # ROI_number += 1
 
                 # Draw the contour and center of the shape on the image
                 # cv2.rectangle(image,(x,y),(x+w,y+h),(36,255,12), 4)
@@ -84,24 +76,13 @@ class ObjectDetector(object):
                 cv2.putText(color_frame, "{}mm".format(distance), (cX, cY - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
                 key = cv2.waitKey(1)
-               # if key == 27:
-                #    break
             
             self.publish_vision(self.positions)
-            '''
-            max_dis = 0
-            max_pos = {}
-            for pos in self.positions:
-                if pos["dis"] > max_dis:
-                    max_dis = pos["dis"]
-                    max_pos = pos
-            print("max_pos:", max_pos)
-            if len(max_pos) != 0:
-                print("publishing camera feed")
-                self.publish_vision(max_pos)
-            '''
+            
             #cv2.imshow('depth frame', depth_frame)
             #cv2.imshow('color frame', color_frame)
+
+            #wait 6 seconds after each publish of frame
             rospy.sleep(6)
 
 

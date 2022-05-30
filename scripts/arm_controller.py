@@ -18,8 +18,6 @@ class Arm(object):
         rospy.init_node('wscr_arm')
 
         #initialize parameters
-        self.l2 = 1 #TODO fill in
-        self.l1 = 1 #TODO fill in
         self.curr_arm_goals = [math.radians(0.0), math.radians(20.0), math.radians(0.0), math.radians(-10.0)]
 
         #arm subscriber
@@ -105,26 +103,12 @@ class Arm(object):
         joints = self.inverse_kin(x, y, depth)
         print("joints:", joints)
 
-
-        '''
-        # open the claw (laser off)
-        gripper_joint_goal = [0.01, 0.01]
-        self.move_group_gripper.go(gripper_joint_goal, wait=True)
-        rospy.sleep(0.5)
-        self.move_group_gripper.stop()
-        '''
         # move the arm
         self.curr_arm_goals = joints
         self.move_group_arm.go(self.curr_arm_goals, wait=True)
         self.move_group_arm.stop()
-
-        # close the claw (laser on)
-        #gripper_joint_goal = [-0.019, -0.019]
-        #self.move_group_gripper.go(gripper_joint_goal, wait=True)
-        #rospy.sleep(0.5)
-        #self.move_group_gripper.stop()
     
-    # Sets the arm position of the robot to point upward
+    # Sets the arm position of the robot to neutral position when starting
     def reset_arm_position(self):
 
         # Fetch arm joint and gripper positions from self.positions
