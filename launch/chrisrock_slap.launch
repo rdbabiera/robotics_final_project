@@ -1,0 +1,12 @@
+<launch>
+  <!-- run aimlab.py-->
+  <node pkg="robotics_final_project" type="aimlab.py" name="aimlab_controller"/>
+
+  <!-- run arm_controller.py-->
+  <node pkg="robotics_final_project" type="arm_controller.py" name="arm_controller"/>
+
+  <!-- run vision_controller.py-->
+  <node pkg="robotics_final_project" type="vision_controller2.py" name="vision_controller" cwd="node"/>
+
+
+</launch>

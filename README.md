@@ -205,3 +205,5 @@ little features to work with is a large task to undertake. The most important
 aspect to this project's success was realizing what each person could achieve 
 within their respective modules and compromising on what we had to provide each 
 other with.
+
+2. Keeping outside/physical variables constant. When testing and debugging our code, we faced many issues where the arm wasn't exactly aiming correctly at the balloons. Initially. we tried changing some parameters in our inverse kinematics component, but we realize that the camera alignment with the turtlebot greatly affected the success of our aim since our RealSense camera wasn't attached to the robot. Thus, it's important to make sure these types of instances are kept constant when testing. 

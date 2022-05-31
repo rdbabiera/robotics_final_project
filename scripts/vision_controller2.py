@@ -6,7 +6,9 @@ import pyrealsense2
 import face_recognition
 import numpy as np
 from robotics_final_project.msg import VisionCoords, ListVisionCoords
+import os
 
+#os.chdir('~/catkin_ws/src/robotics_final_project/scripts')
 # https://pysource.com/2021/03/11/distance-detection-with-depth-camera-intel-realsense-d435i/
 from realsense_depth import *
 
@@ -23,12 +25,17 @@ class ObjectDetector(object):
         self.chris_rock_image = face_recognition.load_image_file("Chris_Rock.jpg")
         self.chris_rock_encoding = face_recognition.face_encodings(self.chris_rock_image)[0]
 
+        self.jada_img = face_recognition.load_image_file("jada_smith.jpeg")
+        self.jada_encoding = face_recognition.face_encodings(self.jada_img)[0]
+        
         # Create arrays of known face encodings and their names
         self.known_face_encodings = [
-            self.chris_rock_encoding
+            self.chris_rock_encoding,
+            self.jada_encoding
         ]
         self.known_face_names = [
-            "Chris Rock"
+            "Chris Rock",
+            "Jada"
         ]
 
         # List of object positions
@@ -64,13 +71,11 @@ class ObjectDetector(object):
             # Facial recognition logic adapted from:
             # https://github.com/ageitgey/face_recognition/blob/master/examples/facerec_from_webcam_faster.py
 
-            # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-            rgb_frame = color_frame[:, :, ::-1]
-
             # Find all the faces and face encodings in the current frame of video
-            face_locations = face_recognition.face_locations(rgb_frame)
-            face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+            face_locations = face_recognition.face_locations(color_frame)
+            face_encodings = face_recognition.face_encodings(color_frame, face_locations)
 
+            print(face_locations)
             face_names = []
             for face_encoding in face_encodings:
                 # See if the face is a match for the known face(s)
@@ -84,7 +89,8 @@ class ObjectDetector(object):
 
                 face_names.append(name)
 
-
+            print(face_names)
+            jada_found = False
             for (top, right, bottom, left), name in zip(face_locations, face_names):
                 # Draw a box around the face
                 cv2.rectangle(color_frame, (left, top), (right, bottom), (0, 0, 255), 2)
@@ -93,6 +99,9 @@ class ObjectDetector(object):
                 cv2.rectangle(color_frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
                 font = cv2.FONT_HERSHEY_DUPLEX
                 cv2.putText(color_frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+
+                if name == "Jada":
+                    jada_found = True
 
                 # If face is Chris Rock, find center coordinates and depth
                 if name == "Chris Rock":
@@ -103,12 +112,16 @@ class ObjectDetector(object):
                     distance = depth_frame[cY,cX]
                     self.positions.append({"x":cX, "y":cY, "dis":distance})
                     cv2.putText(color_frame, "{}mm".format(distance), (cX, cY - 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
+            if not jada_found:
+                print("jada not found")
+                self.positions.clear()
 
-            cv2.imshow('color frame', color_frame)
+            #cv2.imshow('color frame', color_frame)
 
             # Hit 'q' on the keyboard to quit!
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            #if cv2.waitKey(1) & 0xFF == ord('q'):
+            #    break
+            print(self.positions)
             
             self.publish_vision(self.positions)
             '''
