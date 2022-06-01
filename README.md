@@ -48,6 +48,10 @@ a path that performs better than the average score across all paths. More import
 we became able to aim the arm given the current and requested points from RGB images, 
 as well as gaining experience with new devices such as the RealSense camera.
 
+We also have incorporated an initial Chris Rock and Jada Smith facial recognitions to
+our project. The turtlebot can now target balloons with pictures of Chris Rock on them but
+only if there's a balloon with Jada Smith in the feed. 
+
 ### Project Diagram
 
 Looking at the system diagram below, our program activates three independent nodes 
@@ -66,6 +70,12 @@ and the arm_controller.py module moves the arm.
 ### Demo
 
 https://user-images.githubusercontent.com/66919143/170400189-b3733cd4-9a69-4ee8-abe7-5650087d8624.mp4
+
+With Chris Rock facial recognition:
+
+
+https://user-images.githubusercontent.com/60594579/171315176-56f37daa-90de-4d05-bb27-64d876cd6291.mov
+
 
 
 
@@ -130,6 +140,15 @@ In order to execute the code, there may be a few packages that are required not
 commonly used in the course. They are:
 1. torch
 2. torchvision
+3. pyrealsense2
+4. face_recognition (this takes a while, should run with the -vvv to see progress)
+
+To set up the RealSense camera with an Virtualbox Ubuntu VM, follow these steps:
+1. Plug in camera to computer
+2. Install the Virtualbox Extension pack
+3. Go to the USB section in the Settings (may be under Ports) and check "Enable USB Controller"
+4. Click the "Add new USB filter" and find the "Intel(R) RealSense(TM) Depth Camera 435i [50C7]" option
+5. When running the VM, you should then see under the "Devices" tab, a "USB section", and then the RealSense option should be checked
 
 Assuming a flashlight/laser pointer is already situated within the arm's grip, 
 and the RealSense camera is already configured for the system the code is being 
@@ -147,6 +166,14 @@ or run all three files sequentially in the recommended order:
 3. vision_controller.py
 
 vision_controller.py must be ran last as it publishes messages to the aimlab node.
+
+To see our project run with the Chris Rock facial recognition, one may either use the command
+- roslaunch robotics_final_project chrisrock_slap.launch
+
+or run all three files sequentially in the recommended order:
+1. aimlab.py
+2. arm_controller.py
+3. vision_controller2.py
 
 <hr>
 
@@ -185,7 +212,10 @@ still fairly sensitive to small misalignments.
 Given 2-3 more weeks to work on this project, the most ambitious thing we could 
 achieve is to live up to our group name and not only train a "Chris Rock classifier 
 model", but also to have turtlebot drive up to said balloon and use the arm to 
-slap it.
+slap it. Note, we have an initial facial recognition to idenitfy Chris Rock, but we 
+would improve upon this as we only tested with one image. We would see if our recognition
+can identify multiple images of Chris Rock.
+
 
 One method we considered for making the kinematics system more robust to error is 
 using input from the camera to make small corrections to the aim. This would involve 
