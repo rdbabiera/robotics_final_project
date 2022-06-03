@@ -83,9 +83,14 @@ https://user-images.githubusercontent.com/60594579/171315176-56f37daa-90de-4d05-
 
 ## System Architecture
 ### Computer Vision
+The vision component is split into two scripts: vision_controller.py and vision_controller2.py
+
+vision_controller.py works by accessing the D435i depth camera's RGB frame and using OpenCV to find contours in the image, thus identifying the outlines of the balloons. Then, the center pixel of each balloon is calculated and the depth value of each such pixel is accesed from the camera's depth frame. Each balloons' position is added to a dictionary containing an x and y pixel coordinate and a depth measurement in millimeters. A list of these position dictionaries is then published for the Q-Learning component to utilize.
+
+vision_controller2.py works by similarly to vision_controller.py, but instead of looking for contours in an image, it looks for the position of faces. In order to identify faces, we used the Python library `face_recognition`. This required the script reading in two pictures, one of Chris Rock and one of Jada Smith. For each RGB frame the script processes, `face_recognition.face_locations` is used to find the locations of all faces in the frame. Then, `face_recognition.face_encodings` is used to generate encodings for the face at each location. Each encoding is compared to the generated encodings from the Chris Rock and Jada Smith images using `face_recognition.compare_faces`. For each match to Chris Rock, the x, y, and depth measurements are obtained and appended to a list in a similar way to vision_controller.py. However, this list is cleared before being published if Jada Smith's face is not found in the image, meaning the robot will not aim at Chris Rock.
 
 ### Q Learning
-For the Q-Learning componenent of the project, we decided to explore a Machine 
+For the Q-Learning component of the project, we decided to explore a Machine 
 Learning approach in order to account for the sheer amount of states traditional 
 Q-Learning may have to account for. In Deep Q-Learning, we train a model to 
 approximate the Q-Value of a state. 
