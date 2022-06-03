@@ -184,6 +184,7 @@ or run all three files sequentially in the recommended order:
 
 ## Challenges
 ### Vision Challenges
+One challenge we had with recognizing black balloons was the shadow's of the balloons can sometimes be very dark. This meant that if we used color to identify the balloons, our center coordinates for a balloon may be skewed by a dark shadow. If we accounted for the shadow by adjusting our color thresholds, the vision component would not work under all lighting conditions. Instead, we found identifying contours to detect balloons to be more consistent; however, this required making sure our background had no other objects whose contours could be detected. The facial recognition part of the vision component is more consistent and does not require as optimal lighting conditions because faces have many more distinct characteristics for the `face_recognition` library to identify.
 
 ### Q Learning Challenges
 Desiging a Deep Q Learning Network is a problem much more complex than it may 
